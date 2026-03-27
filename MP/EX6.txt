@@ -1,0 +1,98 @@
+
+EXERCISE NUMBER :6
+NAME : INTERFACING STEPPER MOTOR
+DATE : 13/03/26
+PREPARED BY : S SAKTHI YOKESH ,
+              G SAILA VISHNU
+              D MOULIN DARIS
+              M MUHAMMED YOUSUF
+
+
+1: stepper motor full 360 degree rotation
+
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+LIST DB 08H,04H,02H,01H
+LIST1 DB 01H,02H,04H,08H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE ,DS:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV AL,80H
+        MOV DX,FFE6H
+        OUT DX,AL
+L6:     MOV CH,06H
+L2:     LEA SI,LIST
+        MOV CL,04H
+L1:     MOV AL,[SI]
+        MOV DX,FFE0H
+        OUT DX,AL
+        CALL DELAY
+        INC SI
+        DEC CL
+        JNZ L1
+        DEC CH
+        JNZ L2
+        JMP L6
+DELAY:  MOV BX,5555H
+L5:     DEC BX
+        JNZCD L5
+        RET
+CODE ENDS
+END
+
+
+
+2:45 degree rotation
+
+                OUTPUT 2500AD
+.ORG 3000H
+DATA SEGMENT
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV AL,98H
+        MOV DX,FFE6H
+        OUT DX,AL
+L2:     MOV AL,00H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,00H
+        MOV DX,FFE2H
+        OUT DX,AL
+        MOV AL,02H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,03H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,01H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,00H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV DX,FFE4H
+L1:     IN AL,DX
+        RCL AL,01H
+        JNC L1
+        MOV AL,04H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV DX,FFE0H
+        IN AL,DX
+        MOV BL,00H
+        MOV BH,00H
+        DB 9AH,12H,0BH,00H,FFH
+        JMP L2
+CODE ENDS
+END
+[24bcs058@mepcolinux stepper]$eit
+bash: eit: command not found
+[24bcs058@mepcolinux stepper]$exit
+exit

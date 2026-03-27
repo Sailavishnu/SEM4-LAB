@@ -1,0 +1,215 @@
+[24bcs058@mepcolinux micro]$cd ex2
+[24bcs058@mepcolinux ex2]$ls
+ex2.prn  ex2.txt
+[24bcs058@mepcolinux ex2]$cat ex2.prn
+Script started on Fri Feb  6 15:40:25 2026
+[24bcs058@mepcolinux ex2]$cat ex2.txt
+EXERCISE NUMBER :2
+NAME : IMPLEMENTATION OF SORTING ,SEARCHING AND STRING OPERATIONS IN 8086
+DATE : 23/1/26
+PREPARED BY : S SAKTHI YOKESH ,
+              G SAILA VISHNU
+
+
+        1:8086 PROGRAM FOR SORTING THE ARRAY
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+ARRAY DW 0000H,0004H,0001H,0003H,0002H
+COUNT EQU 0005H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV DX,COUNT
+                DEC DX
+L2:             MOV CX,DX
+                MOV SI,OFFSET ARRAY
+L1:             MOV AX,[SI]
+                CMP AX,2[SI]
+                JC L3
+                XCHG AX,2[SI]
+                XCHG AX,[SI]
+L3:             INC SI
+                INC SI
+                LOOP L1
+                DEC DX
+                JNZ L2
+                HLT
+CODE ENDS
+END
+
+
+        2:8086 PROGRAM FOR SEARCHING ELEMENT IN ARRAY
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+ARRAY DW 0050H,0075H,00EFH,0055H
+SEARCH DW 0074H
+COUNT EQU 04H
+RESULT DW 0000H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV SI,OFFSET ARRAY
+                MOV AX,SEARCH
+                MOV CL,COUNT
+L2:             CMP AX,[SI]
+                JZ L1
+                INC SI
+                DEC CL
+                JNZ L2
+                JMP L3
+L1:             INC RESULT
+L3:             HLT
+CODE ENDS
+END
+
+
+        3:8086 PROGRAM FOR COUNT THE  OCCURANCE OF A ELEMENT IN AN ARRAY
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+ARRAY DW 0050H,0075H,0074H,0055H
+SEARCH DW 0075H
+COUNT EQU 04H
+RESULT DB 00H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV SI,OFFSET ARRAY
+                MOV AX,SEARCH
+                MOV CL,COUNT
+L2:             CMP AX,[SI]
+                JZ L1
+                INC SI
+                DEC CL
+                JNZ L2
+                JMP L3
+L1:             INC RESULT
+                INC SI
+                DEC CL
+                JNZ L2
+L3:             HLT
+CODE ENDS
+END
+
+
+
+        4:8086 PROGRAM FOR STRING MATCHING
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+STR1 DB "HELLO"
+STR2 DB "HELLO"
+RES DB 00H
+COUNT DB 05
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE , DS:DATA , ES:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV ES,AX
+                MOV CL,COUNT
+                LEA SI ,STR1
+                LEA DI ,STR2
+                CLD
+L2:             CMPSB
+                JZ L1
+                MOV RES ,00H
+                JMP L3
+L1:             MOV RES ,01H
+                DEC CL
+                JNZ L2
+L3:             HLT
+CODE ENDS
+END
+
+
+        5:8086 PROGRAM FOR STRING SEARCH
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+STR1 DB "HELLO"
+KEY DB "X"
+RES DB 00H
+COUNT DB 05
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE , DS:DATA ,ES:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV ES,AX
+                MOV CL,COUNT
+                LEA DI ,STR1
+                MOV AL,KEY
+L2:             SCASB
+                JNZ L1
+                MOV RES ,01H
+                JMP L3
+L1:             INC DI
+                DEC CL
+                JNZ L2
+L3:             HLT
+CODE ENDS
+END
+
+
+        6:8086 PROGRAM FOR FIND THE LENGTH OF THE TWO STRING AND CHECK EQUAL OR NOT
+
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+STR     DB '$'
+STR1    DB 'HELLL$'
+STR2    DB 'HELLLO$'
+LEN1    DB 00H
+LEN2    DB 00H
+RES     DB 00H
+DATA ENDS
+
+CODE SEGMENT
+        ASSUME CS:CODE, DS:DATA, ES:DATA
+                MOV AX, DATA
+                MOV DS, AX
+                MOV ES, AX
+                MOV AL, STR
+                LEA SI, STR1
+
+L2:             CMP AL, [SI]
+                JZ L1
+                INC LEN1
+                INC SI
+                JMP L2
+L1:             LEA SI, STR2
+L3:             CMP AL, [SI]
+                JZ L4
+                INC LEN2
+                INC SI
+                JMP L3
+L4:             MOV AL, LEN1
+                CMP AL, LEN2
+                JZ L5
+                JMP L6
+L5:             MOV RES, 01H
+                HLT
+L6:             MOV RES ,00H
+                HLT
+CODE ENDS
+END
+
+
+[24bcs058@mepcolinux ex2]$exit
+exit
+
+Script done on Fri Feb  6 15:40:33 2026

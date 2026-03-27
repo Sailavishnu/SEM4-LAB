@@ -1,0 +1,101 @@
+[24bcs058@mepcolinux micro]$cd ex4
+[24bcs058@mepcolinux ex4]$ls
+double.txt  ex4.prn  single.txt
+[24bcs058@mepcolinux ex4]$cat ex4.prn
+EXERCISE NUMBER :4
+NAME : IMPLEMENTATION OF SEVEN SEGMENT DISPLAY USING 8255 IN 8086
+DATE : 26/02/26
+PREPARED BY : S SAKTHI YOKESH ,
+              G SAILA VISHNU
+
+
+Script started on Thu Feb 26 13:51:15 2026
+[24bcs058@mepcolinux ex4]$cat single.txt
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+LIST DB 3FH, 06H, 5BH, 4FH, 66H, 6DH, 7DH, 07H, 7FH, 67H, 77H, 7CH, 39H, 5EH, 79H, 71H
+COUNT DB 10H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV AL,80H
+        MOV DX,FFE6H
+        OUT DX,AL
+REPEAT: LEA SI,LIST
+        MOV CL,COUNT
+L1:     MOV AL,[SI]
+        MOV DX,FFE0H
+        OUT DX,AL
+        CALL DELAY
+        INC SI
+        DEC CL
+        JNZ L1
+        JMP REPEAT
+DELAY:  MOV AH,15H
+L3:     MOV BX,AAAAH
+L2:     DEC BX
+        JNZ L2
+        DEC AH
+        JNZ L3
+        RET
+CODE ENDS
+END
+
+
+
+
+
+[24bcs058@mepcolinux ex4]$cat double.txt
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+LIST DB 71H,79H,5EH,39H,7CH,77H,6FH,7FH,07H,7DH,6DH,66H,4FH,5BH,06H,03H
+LIST1 DB 71H,79H,5EH,39H,7CH,77H,6FH,7FH,07H,7DH,6DH,66H,4FH,5BH,06H,03H
+COUNT DB 10H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE, DS:DATA
+        MOV AX, DATA
+        MOV DS, AX
+        MOV AL,80H
+        MOV DX,FFE6H
+        OUT DX,AL
+REPEAT: LEA SI, LIST
+        LEA DI,LIST1
+        MOV CL, COUNT
+L1:     MOV AL, [SI]
+        MOV DX, FFE0H
+        OUT DX, AL
+        MOV AL,[DI]
+        MOV DX, FFE2H
+        OUT DX, AL
+        CALL DELAY
+        INC SI
+        INC DI
+        DEC CL
+        JNZ L1
+        JMP REPEAT
+DELAY:  MOV AH, 15H
+L3:     MOV BX, AAAAH
+L2:     DEC BX
+        JNZ L2
+        DEC AH
+        JNZ L3
+        RET
+CODE ENDS
+END
+
+
+
+
+
+[24bcs058@mepcolinux ex4]$exit
+exit
+
+Script done on Thu Feb 26 13:51:32 2026
+[24bcs058@mepcolinux ex4]$logout
+Connection to 172.16.16.200 closed.
+
