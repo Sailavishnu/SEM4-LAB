@@ -1,13 +1,4 @@
 
-EXERCISE NUMBER :6
-NAME : INTERFACING STEPPER MOTOR
-DATE : 13/03/26
-PREPARED BY : S SAKTHI YOKESH ,
-              G SAILA VISHNU
-              D MOULIN DARIS
-              M MUHAMMED YOUSUF
-
-
 1: stepper motor full 360 degree rotation
 
 
@@ -92,7 +83,3 @@ L1:     IN AL,DX
         JMP L2
 CODE ENDS
 END
-[24bcs058@mepcolinux stepper]$eit
-bash: eit: command not found
-[24bcs058@mepcolinux stepper]$exit
-exit

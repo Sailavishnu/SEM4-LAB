@@ -1,14 +1,4 @@
-[24bcs058@mepcolinux micro]$cd ex3
-[24bcs058@mepcolinux ex3]$ls
-e3.prn  ex3.txt
-[24bcs058@mepcolinux ex3]$cat e3.prn
-Script started on Sat Feb 21 16:28:05 2026
-[24bcs058@mepcolinux ex3]$cat ex3.txt
-EXERCISE NUMBER :3
-NAME : SIMPLE 8086 PROGRAMMING WTH BIOS AND DOS INTERUPT
-DATE : 13/2/26
-PREPARED BY : S SAKTHI YOKESH ,
-              G SAILA VISHNU
+
 
 1:COMPARISION OF TWO STRINGS
 
@@ -159,8 +149,3 @@ CODE SEGMENT
 CODE ENDS
 END
 
-
-[24bcs058@mepcolinux ex3]$exit
-exit
-
-Script done on Sat Feb 21 16:28:12 2026

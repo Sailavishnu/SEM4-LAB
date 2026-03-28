@@ -1,15 +1,3 @@
-[24bcs058@mepcolinux micro]$cd ex2
-[24bcs058@mepcolinux ex2]$ls
-ex2.prn  ex2.txt
-[24bcs058@mepcolinux ex2]$cat ex2.prn
-Script started on Fri Feb  6 15:40:25 2026
-[24bcs058@mepcolinux ex2]$cat ex2.txt
-EXERCISE NUMBER :2
-NAME : IMPLEMENTATION OF SORTING ,SEARCHING AND STRING OPERATIONS IN 8086
-DATE : 23/1/26
-PREPARED BY : S SAKTHI YOKESH ,
-              G SAILA VISHNU
-
 
         1:8086 PROGRAM FOR SORTING THE ARRAY
 
@@ -209,7 +197,3 @@ CODE ENDS
 END
 
 
-[24bcs058@mepcolinux ex2]$exit
-exit
-
-Script done on Fri Feb  6 15:40:33 2026

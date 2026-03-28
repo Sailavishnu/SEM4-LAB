@@ -1,13 +1,4 @@
-
-timer 
-
-
-EXP NO:7
-EXP NAME: TIMER OF MODE0,2,3
-AUTHORS:A.HARIHARASUDHAN
-        V.HARIPRASAD
-        G.JEYA VISHNU
-        J.JEYASURYA
+timer mode 0
                 OUTPUT 2500AD
 .ORG 2000H
 CODE SEGMENT
@@ -24,6 +15,9 @@ CODE ENDS
 END
 
 
+timer mode 1
+
+
                 OUTPUT 2500AD
 .ORG 2000H
 CODE SEGMENT
@@ -38,7 +32,7 @@ START:
 CODE ENDS
 END
 
-
+timer mode 2
 
                 OUTPUT 2500AD
   .ORG 2000H

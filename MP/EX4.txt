@@ -1,16 +1,4 @@
-[24bcs058@mepcolinux micro]$cd ex4
-[24bcs058@mepcolinux ex4]$ls
-double.txt  ex4.prn  single.txt
-[24bcs058@mepcolinux ex4]$cat ex4.prn
-EXERCISE NUMBER :4
-NAME : IMPLEMENTATION OF SEVEN SEGMENT DISPLAY USING 8255 IN 8086
-DATE : 26/02/26
-PREPARED BY : S SAKTHI YOKESH ,
-              G SAILA VISHNU
 
-
-Script started on Thu Feb 26 13:51:15 2026
-[24bcs058@mepcolinux ex4]$cat single.txt
                 OUTPUT 2500AD
 .ORG 2000H
 DATA SEGMENT
@@ -48,7 +36,6 @@ END
 
 
 
-[24bcs058@mepcolinux ex4]$cat double.txt
                 OUTPUT 2500AD
 .ORG 2000H
 DATA SEGMENT
@@ -89,13 +76,4 @@ CODE ENDS
 END
 
 
-
-
-
-[24bcs058@mepcolinux ex4]$exit
-exit
-
-Script done on Thu Feb 26 13:51:32 2026
-[24bcs058@mepcolinux ex4]$logout
-Connection to 172.16.16.200 closed.
 
