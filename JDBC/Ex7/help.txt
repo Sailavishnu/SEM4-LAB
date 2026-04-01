@@ -1,0 +1,12 @@
+STUDENT TABLE (Oracle) – for StudentOracleApp
+
+COMPILE + RUN (PowerShell)
+
+Open PowerShell in this folder:
+  C:\Users\vishn\Desktop\SEM4 LAB\JDBC\Ex7
+
+Compile:
+  javac -cp ".;..\lib\ojdbc11.jar" StudentOracleApp.java
+
+Run:
+  java -cp ".;..\lib\ojdbc11.jar" StudentOracleApp
