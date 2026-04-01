@@ -110,6 +110,10 @@ class AdminDashboard extends JPanel {
         add(addBtn);
         add(updateBtn);
         add(manageBtn);
+
+        addBtn.addActionListener(e -> new AddProductForm(app).setVisible(true));
+        updateBtn.addActionListener(e -> new UpdateProductForm(app).setVisible(true));
+        manageBtn.addActionListener(e -> new ManageProductsForm(app).setVisible(true));
     }
 }
 
@@ -984,6 +988,287 @@ class OrderHistoryPage extends JFrame {
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error loading order details: " + ex.getMessage());
+        }
+    }
+}
+
+class AddProductForm extends JFrame {
+    private OnlineShoppingApp app;
+
+    public AddProductForm(OnlineShoppingApp app) {
+        this.app = app;
+        setTitle("Add Product");
+        setSize(400, 300);
+        setLocationRelativeTo(null);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        JTextField nameField = new JTextField(15);
+        JTextField categoryField = new JTextField(15);
+        JTextField priceField = new JTextField(15);
+        JTextField stockField = new JTextField(15);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(new JLabel("Product Name:"), gbc);
+        gbc.gridx = 1;
+        add(nameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        add(new JLabel("Category:"), gbc);
+        gbc.gridx = 1;
+        add(categoryField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        add(new JLabel("Price:"), gbc);
+        gbc.gridx = 1;
+        add(priceField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        add(new JLabel("Stock:"), gbc);
+        gbc.gridx = 1;
+        add(stockField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        JButton addBtn = new JButton("Add Product");
+        add(addBtn, gbc);
+
+        addBtn.addActionListener(e -> {
+            try {
+                String sql = "INSERT INTO Productss (product_id, product_name, category, price, stock_quantity) VALUES (productss_seq.NEXTVAL, ?, ?, ?, ?)";
+                PreparedStatement stmt = app.con.prepareStatement(sql);
+                stmt.setString(1, nameField.getText());
+                stmt.setString(2, categoryField.getText());
+                stmt.setDouble(3, Double.parseDouble(priceField.getText()));
+                stmt.setInt(4, Integer.parseInt(stockField.getText()));
+                stmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Product added successfully!");
+                dispose();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter valid price and stock");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+        setVisible(true);
+    }
+}
+
+class UpdateProductForm extends JFrame {
+    private OnlineShoppingApp app;
+    private JComboBox<String> productCombo;
+    private JTextField nameField, categoryField, priceField, stockField;
+    private boolean isLoading = false;
+
+    public UpdateProductForm(OnlineShoppingApp app) {
+        this.app = app;
+        setTitle("Update Product");
+        setSize(400, 320);
+        setLocationRelativeTo(null);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        productCombo = new JComboBox<>();
+        nameField = new JTextField(15);
+        categoryField = new JTextField(15);
+        priceField = new JTextField(15);
+        stockField = new JTextField(15);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(new JLabel("Select Product:"), gbc);
+        gbc.gridx = 1;
+        add(productCombo, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        add(new JLabel("Name:"), gbc);
+        gbc.gridx = 1;
+        add(nameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        add(new JLabel("Category:"), gbc);
+        gbc.gridx = 1;
+        add(categoryField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        add(new JLabel("Price:"), gbc);
+        gbc.gridx = 1;
+        add(priceField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        add(new JLabel("Stock:"), gbc);
+        gbc.gridx = 1;
+        add(stockField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        JButton updateBtn = new JButton("Update Product");
+        add(updateBtn, gbc);
+
+        isLoading = true;
+        loadProducts();
+        isLoading = false;
+
+        productCombo.addActionListener(e -> {
+            if (!isLoading) {
+                loadProductDetails();
+            }
+        });
+
+        if (productCombo.getItemCount() > 0) {
+            loadProductDetails();
+        }
+
+        updateBtn.addActionListener(e -> {
+            try {
+                String selectedItem = productCombo.getSelectedItem().toString();
+                int productId = Integer.parseInt(selectedItem.split(" - ")[0]);
+
+                String sql = "UPDATE Productss SET product_name = ?, category = ?, price = ?, stock_quantity = ? WHERE product_id = ?";
+                PreparedStatement stmt = app.con.prepareStatement(sql);
+                stmt.setString(1, nameField.getText());
+                stmt.setString(2, categoryField.getText());
+                stmt.setDouble(3, Double.parseDouble(priceField.getText()));
+                stmt.setInt(4, Integer.parseInt(stockField.getText()));
+                stmt.setInt(5, productId);
+                stmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Product updated successfully!");
+                dispose();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+        setVisible(true);
+    }
+
+    private void loadProducts() {
+        try {
+            String sql = "SELECT product_id, product_name FROM Productss ORDER BY product_id";
+            PreparedStatement stmt = app.con.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            productCombo.removeAllItems();
+            while (rs.next()) {
+                productCombo.addItem(rs.getInt("product_id") + " - " + rs.getString("product_name"));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    private void loadProductDetails() {
+        try {
+            Object selected = productCombo.getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+
+            int productId = Integer.parseInt(selected.toString().split(" - ")[0]);
+            String sql = "SELECT product_name, category, price, stock_quantity FROM Productss WHERE product_id = ?";
+            PreparedStatement stmt = app.con.prepareStatement(sql);
+            stmt.setInt(1, productId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                nameField.setText(rs.getString("product_name"));
+                categoryField.setText(rs.getString("category"));
+                priceField.setText(String.valueOf(rs.getDouble("price")));
+                stockField.setText(String.valueOf(rs.getInt("stock_quantity")));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+}
+
+class ManageProductsForm extends JFrame {
+    private OnlineShoppingApp app;
+    private DefaultTableModel model;
+    private JTable table;
+
+    public ManageProductsForm(OnlineShoppingApp app) {
+        this.app = app;
+        setTitle("Manage Products");
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        model = new DefaultTableModel(new String[] { "ID", "Name", "Category", "Price", "Stock" }, 0);
+        table = new JTable(model);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+        JPanel panel = new JPanel();
+        JButton deleteBtn = new JButton("Delete Product");
+        JButton refreshBtn = new JButton("Refresh");
+        panel.add(deleteBtn);
+        panel.add(refreshBtn);
+        add(panel, BorderLayout.SOUTH);
+
+        deleteBtn.addActionListener(e -> deleteProduct());
+        refreshBtn.addActionListener(e -> loadProducts());
+
+        loadProducts();
+        setVisible(true);
+    }
+
+    private void loadProducts() {
+        try {
+            String sql = "SELECT product_id, product_name, category, price, stock_quantity FROM Productss ORDER BY product_id";
+            PreparedStatement stmt = app.con.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            model.setRowCount(0);
+            while (rs.next()) {
+                model.addRow(new Object[] {
+                        rs.getInt("product_id"),
+                        rs.getString("product_name"),
+                        rs.getString("category"),
+                        rs.getDouble("price"),
+                        rs.getInt("stock_quantity")
+                });
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    private void deleteProduct() {
+        int row = table.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a product to delete");
+            return;
+        }
+
+        try {
+            int productId = (Integer) model.getValueAt(row, 0);
+            String productName = (String) model.getValueAt(row, 1);
+
+            int confirm = JOptionPane.showConfirmDialog(this, "Delete '" + productName + "'?", "Confirm Delete",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                String sql = "DELETE FROM Productss WHERE product_id = ?";
+                PreparedStatement stmt = app.con.prepareStatement(sql);
+                stmt.setInt(1, productId);
+                stmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Product deleted!");
+                loadProducts();
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
         }
     }
 }
