@@ -1,16 +1,55 @@
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class StudentOracleApp extends JFrame {
 
     JTextField idField, avgField;
-    JButton avgBtn, menuBtn;
+    JButton avgBtn;
     JTable table;
     DefaultTableModel model;
 
     Connection con;
+
+    static class StudentRecord {
+        final int id;
+        final String name;
+        final int m1;
+        final int m2;
+        final int m3;
+
+        StudentRecord(int id, String name, int m1, int m2, int m3) {
+            this.id = id;
+            this.name = name;
+            this.m1 = m1;
+            this.m2 = m2;
+            this.m3 = m3;
+        }
+    }
+
+    StudentRecord fetchStudentById(int studentId) {
+        if (con == null) {
+            return null;
+        }
+        String sql = "SELECT stdid, name, mark1, mark2, mark3 FROM student WHERE stdid=?";
+        try (PreparedStatement pst = con.prepareStatement(sql)) {
+            pst.setInt(1, studentId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return new StudentRecord(
+                            rs.getInt(1),
+                            rs.getString(2),
+                            rs.getInt(3),
+                            rs.getInt(4),
+                            rs.getInt(5));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     void printStudentDetails(int id, String name, int m1, int m2, int m3, String actionLine) {
         System.out.println("id : " + id);
@@ -78,7 +117,17 @@ public class StudentOracleApp extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        // Row 1 - Enter ID
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Menu");
+        JMenuItem insertItem = new JMenuItem("Insert");
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        JMenuItem updateItem = new JMenuItem("Update");
+        menu.add(insertItem);
+        menu.add(deleteItem);
+        menu.add(updateItem);
+        menuBar.add(menu);
+        setJMenuBar(menuBar);
+
         JLabel idLabel = new JLabel("Enter Student ID:");
         idLabel.setBounds(50, 30, 200, 30);
         add(idLabel);
@@ -87,7 +136,6 @@ public class StudentOracleApp extends JFrame {
         idField.setBounds(220, 30, 200, 30);
         add(idField);
 
-        // Row 2 - Avg
         avgBtn = new JButton("Calculate Avg");
         avgBtn.setBounds(50, 80, 180, 35);
         add(avgBtn);
@@ -97,12 +145,6 @@ public class StudentOracleApp extends JFrame {
         avgField.setEditable(false);
         add(avgField);
 
-        // Row 3 - Menu
-        menuBtn = new JButton("Menu");
-        menuBtn.setBounds(50, 130, 120, 35);
-        add(menuBtn);
-
-        // Row 4 - Table
         model = new DefaultTableModel();
         model.setColumnIdentifiers(new String[] { "ID", "Name", "M1", "M2", "M3" });
 
@@ -115,22 +157,22 @@ public class StudentOracleApp extends JFrame {
         if (con != null) {
             loadTable();
         } else {
-            // Avoid NPEs later; user must fix DB config/classpath first.
             avgBtn.setEnabled(false);
-            menuBtn.setEnabled(false);
+            insertItem.setEnabled(false);
+            deleteItem.setEnabled(false);
+            updateItem.setEnabled(false);
         }
 
         avgBtn.addActionListener(e -> calculateAvg());
-        menuBtn.addActionListener(e -> new MenuWindow());
+        insertItem.addActionListener(e -> new InsertForm());
+        deleteItem.addActionListener(e -> deleteStudent());
+        updateItem.addActionListener(e -> new UpdateForm());
 
         setVisible(true);
     }
 
-    // DB CONNECTION
     void connectDB() {
         try {
-            // Works with modern ojdbc drivers; older ones also accept
-            // oracle.jdbc.driver.OracleDriver
             Class.forName("oracle.jdbc.OracleDriver");
 
             String url = "jdbc:oracle:thin:@localhost:1521:xe";
@@ -151,7 +193,6 @@ public class StudentOracleApp extends JFrame {
         }
     }
 
-    // LOAD TABLE
     void loadTable() {
         if (con == null) {
             return;
@@ -176,7 +217,6 @@ public class StudentOracleApp extends JFrame {
         }
     }
 
-    // AVG
     void calculateAvg() {
         if (con == null) {
             JOptionPane.showMessageDialog(this, "Not connected to DB.");
@@ -205,31 +245,6 @@ public class StudentOracleApp extends JFrame {
         }
     }
 
-    // MENU (SMALL)
-    class MenuWindow extends JFrame {
-        MenuWindow() {
-            setTitle("Menu");
-            setSize(250, 200);
-            setLayout(new GridLayout(3, 1, 10, 10));
-            setLocationRelativeTo(null);
-
-            JButton insert = new JButton("Insert");
-            JButton delete = new JButton("Delete");
-            JButton update = new JButton("Update");
-
-            add(insert);
-            add(delete);
-            add(update);
-
-            insert.addActionListener(e -> new InsertForm());
-            delete.addActionListener(e -> deleteStudent());
-            update.addActionListener(e -> new UpdateForm());
-
-            setVisible(true);
-        }
-    }
-
-    // INSERT (SMALL)
     class InsertForm extends JFrame {
         JTextField id, name, m1, m2, m3;
 
@@ -299,7 +314,6 @@ public class StudentOracleApp extends JFrame {
         }
     }
 
-    // DELETE
     void deleteStudent() {
         if (con == null) {
             JOptionPane.showMessageDialog(this, "Not connected to DB.");
@@ -314,8 +328,6 @@ public class StudentOracleApp extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 int studentId = Integer.parseInt(id.trim());
-
-                // Print the row that will be deleted (before deleting)
                 printStudentById(studentId, "will be deleted...");
 
                 PreparedStatement pst = con.prepareStatement(
@@ -340,14 +352,15 @@ public class StudentOracleApp extends JFrame {
         }
     }
 
-    // UPDATE (SMALL)
     class UpdateForm extends JFrame {
         JTextField id, name, m1, m2, m3;
+
+        StudentRecord loaded;
 
         UpdateForm() {
             setTitle("Update Student");
             setSize(350, 300);
-            setLayout(new GridLayout(6, 2, 10, 10));
+            setLayout(new GridLayout(7, 2, 10, 10));
             setLocationRelativeTo(null);
 
             id = new JTextField();
@@ -355,10 +368,19 @@ public class StudentOracleApp extends JFrame {
             add(new JLabel("Enter ID"));
             add(id);
 
+            JButton fetch = new JButton("Fetch");
+            add(new JLabel(""));
+            add(fetch);
+
             name = new JTextField();
             m1 = new JTextField();
             m2 = new JTextField();
             m3 = new JTextField();
+
+            name.setEnabled(false);
+            m1.setEnabled(false);
+            m2.setEnabled(false);
+            m3.setEnabled(false);
 
             add(new JLabel("New Name"));
             add(name);
@@ -370,7 +392,60 @@ public class StudentOracleApp extends JFrame {
             add(m3);
 
             JButton update = new JButton("Update");
+            update.setEnabled(false);
+            add(new JLabel(""));
             add(update);
+
+            fetch.addActionListener(e -> {
+                try {
+                    if (con == null) {
+                        JOptionPane.showMessageDialog(this, "Not connected to DB.");
+                        return;
+                    }
+
+                    String rawId = id.getText();
+                    if (rawId == null || rawId.trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "Enter a student ID.");
+                        return;
+                    }
+
+                    int studentId = Integer.parseInt(rawId.trim());
+
+                    loaded = fetchStudentById(studentId);
+                    if (loaded == null) {
+                        JOptionPane.showMessageDialog(this, "Student not found!");
+                        name.setText("");
+                        m1.setText("");
+                        m2.setText("");
+                        m3.setText("");
+                        name.setEnabled(false);
+                        m1.setEnabled(false);
+                        m2.setEnabled(false);
+                        m3.setEnabled(false);
+                        update.setEnabled(false);
+                        return;
+                    }
+
+                    // Display all fields except allowing ID edits
+                    id.setEnabled(false);
+                    name.setEnabled(true);
+                    m1.setEnabled(true);
+                    m2.setEnabled(true);
+                    m3.setEnabled(true);
+                    update.setEnabled(true);
+
+                    name.setText(loaded.name);
+                    m1.setText(String.valueOf(loaded.m1));
+                    m2.setText(String.valueOf(loaded.m2));
+                    m3.setText(String.valueOf(loaded.m3));
+
+                    printStudentDetails(loaded.id, loaded.name, loaded.m1, loaded.m2, loaded.m3,
+                            "loaded for update...");
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Invalid ID!");
+                }
+            });
 
             update.addActionListener(e -> {
                 try {
@@ -379,15 +454,33 @@ public class StudentOracleApp extends JFrame {
                         return;
                     }
 
-                    int studentId = Integer.parseInt(id.getText());
+                    if (loaded == null) {
+                        JOptionPane.showMessageDialog(this, "Fetch a student by ID first.");
+                        return;
+                    }
+
+                    int studentId = loaded.id;
+
+                    String newName = name.getText() == null ? "" : name.getText().trim();
+                    if (newName.isEmpty()) {
+                        newName = loaded.name;
+                    }
+
+                    String rawM1 = m1.getText() == null ? "" : m1.getText().trim();
+                    String rawM2 = m2.getText() == null ? "" : m2.getText().trim();
+                    String rawM3 = m3.getText() == null ? "" : m3.getText().trim();
+
+                    int newM1 = rawM1.isEmpty() ? loaded.m1 : Integer.parseInt(rawM1);
+                    int newM2 = rawM2.isEmpty() ? loaded.m2 : Integer.parseInt(rawM2);
+                    int newM3 = rawM3.isEmpty() ? loaded.m3 : Integer.parseInt(rawM3);
 
                     PreparedStatement pst = con.prepareStatement(
                             "UPDATE student SET name=?, mark1=?, mark2=?, mark3=? WHERE stdid=?");
 
-                    pst.setString(1, name.getText());
-                    pst.setInt(2, Integer.parseInt(m1.getText()));
-                    pst.setInt(3, Integer.parseInt(m2.getText()));
-                    pst.setInt(4, Integer.parseInt(m3.getText()));
+                    pst.setString(1, newName);
+                    pst.setInt(2, newM1);
+                    pst.setInt(3, newM2);
+                    pst.setInt(4, newM3);
                     pst.setInt(5, studentId);
 
                     int rows = pst.executeUpdate();
