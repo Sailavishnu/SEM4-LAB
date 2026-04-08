@@ -1,3 +1,19 @@
+C:\Users\vishn\Desktop\SEM4 LAB> javac -d bin -cp ".;..\lib\ojdbc11.jar" .\OnlineShoppingApp2.java                                                         
+error: file not found: .\OnlineShoppingApp2.java                               
+Usage: javac <options> <source files>
+use --help for a list of possible options
+PS C:\Users\vishn\Desktop\SEM4 LAB> java -cp "bin;..\lib\ojdbc11.jar" OnlineShoppingApp                                                                       
+Error: Could not find or load main class OnlineShoppingApp                     
+Caused by: java.lang.ClassNotFoundException: OnlineShoppingApp
+PS C:\Users\vishn\Desktop\SEM4 LAB> 
+
+
+
+
+
+
+
+
 import java.awt.*;
 import java.sql.*;
 import javax.swing.*;
@@ -190,29 +206,12 @@ class RegistrationForm extends JPanel {
                 return;
             }
             try {
-                String email = emailField.getText().trim();
-                String phone = phoneField.getText().trim();
-
-                if (!phone.matches("\\d{10}")) {
-                    JOptionPane.showMessageDialog(this, "Mobile number must be exactly 10 digits (numbers only).");
-                    return;
-                }
-
-                PreparedStatement emailCheckSt = app.con
-                        .prepareStatement("SELECT COUNT(*) FROM Customerss WHERE LOWER(email)=LOWER(?)");
-                emailCheckSt.setString(1, email);
-                ResultSet emailRs = emailCheckSt.executeQuery();
-                if (emailRs.next() && emailRs.getInt(1) > 0) {
-                    JOptionPane.showMessageDialog(this, "User with this email exists.");
-                    return;
-                }
-
                 PreparedStatement st = app.con.prepareStatement(
                         "INSERT INTO Customerss (customer_id,name,email,phone,password,address,created_date) " +
                                 "VALUES (customerss_seq.NEXTVAL,?,?,?,?,?,SYSDATE)");
                 st.setString(1, nameField.getText());
-                st.setString(2, email);
-                st.setString(3, phone);
+                st.setString(2, emailField.getText());
+                st.setString(3, phoneField.getText());
                 st.setString(4, new String(passField.getPassword()));
                 st.setString(5, addressArea.getText());
                 st.executeUpdate();
