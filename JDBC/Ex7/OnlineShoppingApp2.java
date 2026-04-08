@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -151,6 +153,17 @@ class RegistrationForm extends JPanel {
         JPasswordField passField = new JPasswordField(20);
         JTextArea addressArea = new JTextArea(3, 20);
 
+        phoneField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char ch = e.getKeyChar();
+                String current = phoneField.getText();
+                if (!Character.isDigit(ch) || current.length() >= 10) {
+                    e.consume();
+                }
+            }
+        });
+
         g.gridx = 0;
         g.gridy = 0;
         add(new JLabel("Name:"), g);
@@ -190,8 +203,26 @@ class RegistrationForm extends JPanel {
                 return;
             }
             try {
+                String name = nameField.getText().trim();
                 String email = emailField.getText().trim();
                 String phone = phoneField.getText().trim();
+                String password = new String(passField.getPassword()).trim();
+                String address = addressArea.getText().trim();
+
+                if (name.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty() || address.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "fill all the field");
+                    return;
+                }
+
+                int atCount = email.length() - email.replace("@", "").length();
+                int dotCount = email.length() - email.replace(".", "").length();
+                int atIndex = email.indexOf('@');
+                int dotIndex = email.lastIndexOf('.');
+                if (atCount != 1 || dotCount != 1 || atIndex <= 0 || dotIndex <= atIndex + 1
+                        || dotIndex == email.length() - 1) {
+                    JOptionPane.showMessageDialog(this, "Email must contain exactly one '@' and one '.'.");
+                    return;
+                }
 
                 if (!phone.matches("\\d{10}")) {
                     JOptionPane.showMessageDialog(this, "Mobile number must be exactly 10 digits (numbers only).");
@@ -210,11 +241,11 @@ class RegistrationForm extends JPanel {
                 PreparedStatement st = app.con.prepareStatement(
                         "INSERT INTO Customerss (customer_id,name,email,phone,password,address,created_date) " +
                                 "VALUES (customerss_seq.NEXTVAL,?,?,?,?,?,SYSDATE)");
-                st.setString(1, nameField.getText());
+                st.setString(1, name);
                 st.setString(2, email);
                 st.setString(3, phone);
-                st.setString(4, new String(passField.getPassword()));
-                st.setString(5, addressArea.getText());
+                st.setString(4, password);
+                st.setString(5, address);
                 st.executeUpdate();
                 JOptionPane.showMessageDialog(this, "Registration Successful! Please login.");
                 app.showPanel("Login");

@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.sql.*;
+import java.util.Scanner;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -169,6 +170,73 @@ public class StudentOracleApp extends JFrame {
         updateItem.addActionListener(e -> new UpdateForm());
 
         setVisible(true);
+
+        Thread terminalThread = new Thread(this::runTerminalInsertPrompt, "terminal-insert-thread");
+        terminalThread.setDaemon(true);
+        terminalThread.start();
+    }
+
+    void runTerminalInsertPrompt() {
+        if (con == null) {
+            System.out.println("DB not connected. Terminal insert disabled.");
+            return;
+        }
+
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            try {
+                System.out.print("Insert a student now? (y/n): ");
+                String choice = sc.nextLine().trim();
+
+                if ("n".equalsIgnoreCase(choice) || "no".equalsIgnoreCase(choice)) {
+                    System.out.println("Terminal mode denied.");
+                    continue;
+                }
+
+                if (!"yes".equalsIgnoreCase(choice) && !"y".equalsIgnoreCase(choice)) {
+                    System.out.println("Please enter y or n.");
+                    continue;
+                }
+
+                System.out.print("Enter ID: ");
+                int studentId = Integer.parseInt(sc.nextLine().trim());
+
+                System.out.print("Enter Name: ");
+                String studentName = sc.nextLine().trim();
+
+                System.out.print("Enter Mark1: ");
+                int mark1 = Integer.parseInt(sc.nextLine().trim());
+
+                System.out.print("Enter Mark2: ");
+                int mark2 = Integer.parseInt(sc.nextLine().trim());
+
+                System.out.print("Enter Mark3: ");
+                int mark3 = Integer.parseInt(sc.nextLine().trim());
+
+                PreparedStatement pst = con.prepareStatement("INSERT INTO student VALUES(?,?,?,?,?)");
+                pst.setInt(1, studentId);
+                pst.setString(2, studentName);
+                pst.setInt(3, mark1);
+                pst.setInt(4, mark2);
+                pst.setInt(5, mark3);
+
+                pst.executeUpdate();
+
+                System.out.println();
+                printStudentDetails(studentId, studentName, mark1, mark2, mark3, "inserted into DB.");
+                printAllStudents();
+                SwingUtilities.invokeLater(this::loadTable);
+                break;
+            } catch (NumberFormatException ex) {
+                System.out.println("Invalid input. ID and marks must be integers.");
+            } catch (SQLException ex) {
+                if (ex.getErrorCode() == 1) {
+                    System.out.println("Insert failed: Student ID already exists.");
+                } else {
+                    System.out.println("Insert failed: " + ex.getMessage());
+                }
+            }
+        }
     }
 
     void connectDB() {
