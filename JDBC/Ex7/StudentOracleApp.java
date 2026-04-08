@@ -171,71 +171,174 @@ public class StudentOracleApp extends JFrame {
 
         setVisible(true);
 
-        Thread terminalThread = new Thread(this::runTerminalInsertPrompt, "terminal-insert-thread");
+        Thread terminalThread = new Thread(this::runTerminalMenu, "terminal-menu-thread");
         terminalThread.setDaemon(true);
         terminalThread.start();
     }
 
-    void runTerminalInsertPrompt() {
+    void runTerminalMenu() {
         if (con == null) {
-            System.out.println("DB not connected. Terminal insert disabled.");
+            System.out.println("DB not connected. Terminal menu disabled.");
             return;
         }
 
         Scanner sc = new Scanner(System.in);
         while (true) {
             try {
-                System.out.print("Insert a student now? (y/n): ");
+                System.out.println("\n--- TERMINAL MENU ---");
+                System.out.println("1. Insert Student");
+                System.out.println("2. Update Student");
+                System.out.println("3. Delete Student");
+                System.out.println("4. Exit");
+                System.out.print("Enter choice: ");
+
                 String choice = sc.nextLine().trim();
-
-                if ("n".equalsIgnoreCase(choice) || "no".equalsIgnoreCase(choice)) {
-                    System.out.println("Terminal mode denied.");
+                if ("1".equals(choice)) {
+                    terminalInsert(sc);
+                } else if ("2".equals(choice)) {
+                    terminalUpdate(sc);
+                } else if ("3".equals(choice)) {
+                    terminalDelete(sc);
+                } else if ("4".equals(choice)) {
+                    System.out.println("Exiting terminal menu.");
+                    break;
+                } else {
+                    System.out.println("Invalid choice. Enter 1, 2, 3, or 4.");
                     continue;
                 }
+            } catch (Exception ex) {
+                System.out.println("Operation failed: " + ex.getMessage());
+            }
+        }
+    }
 
-                if (!"yes".equalsIgnoreCase(choice) && !"y".equalsIgnoreCase(choice)) {
-                    System.out.println("Please enter y or n.");
-                    continue;
-                }
+    void terminalInsert(Scanner sc) {
+        try {
+            System.out.print("Enter ID: ");
+            int studentId = Integer.parseInt(sc.nextLine().trim());
 
-                System.out.print("Enter ID: ");
-                int studentId = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("Enter Name: ");
+            String studentName = sc.nextLine().trim();
 
-                System.out.print("Enter Name: ");
-                String studentName = sc.nextLine().trim();
+            System.out.print("Enter Mark1: ");
+            int mark1 = Integer.parseInt(sc.nextLine().trim());
 
-                System.out.print("Enter Mark1: ");
-                int mark1 = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("Enter Mark2: ");
+            int mark2 = Integer.parseInt(sc.nextLine().trim());
 
-                System.out.print("Enter Mark2: ");
-                int mark2 = Integer.parseInt(sc.nextLine().trim());
+            System.out.print("Enter Mark3: ");
+            int mark3 = Integer.parseInt(sc.nextLine().trim());
 
-                System.out.print("Enter Mark3: ");
-                int mark3 = Integer.parseInt(sc.nextLine().trim());
+            PreparedStatement pst = con.prepareStatement("INSERT INTO student VALUES(?,?,?,?,?)");
+            pst.setInt(1, studentId);
+            pst.setString(2, studentName);
+            pst.setInt(3, mark1);
+            pst.setInt(4, mark2);
+            pst.setInt(5, mark3);
 
-                PreparedStatement pst = con.prepareStatement("INSERT INTO student VALUES(?,?,?,?,?)");
-                pst.setInt(1, studentId);
-                pst.setString(2, studentName);
-                pst.setInt(3, mark1);
-                pst.setInt(4, mark2);
-                pst.setInt(5, mark3);
+            pst.executeUpdate();
 
-                pst.executeUpdate();
+            System.out.println();
+            printStudentDetails(studentId, studentName, mark1, mark2, mark3, "inserted into DB.");
+            printAllStudents();
+            SwingUtilities.invokeLater(this::loadTable);
+        } catch (NumberFormatException ex) {
+            System.out.println("Invalid input. ID and marks must be integers.");
+        } catch (SQLException ex) {
+            if (ex.getErrorCode() == 1) {
+                System.out.println("Insert failed: Student ID already exists.");
+            } else {
+                System.out.println("Insert failed: " + ex.getMessage());
+            }
+        }
+    }
 
-                System.out.println();
-                printStudentDetails(studentId, studentName, mark1, mark2, mark3, "inserted into DB.");
+    void terminalUpdate(Scanner sc) {
+        try {
+            System.out.print("Enter ID to update: ");
+            int studentId = Integer.parseInt(sc.nextLine().trim());
+
+            StudentRecord loaded = fetchStudentById(studentId);
+            if (loaded == null) {
+                System.out.println("Student not found.");
+                return;
+            }
+
+            printStudentDetails(loaded.id, loaded.name, loaded.m1, loaded.m2, loaded.m3, "current data.");
+
+            System.out.print("Enter New Name (leave empty to keep same): ");
+            String newNameRaw = sc.nextLine().trim();
+            String newName = newNameRaw.isEmpty() ? loaded.name : newNameRaw;
+
+            System.out.print("Enter New Mark1 (leave empty to keep same): ");
+            String m1Raw = sc.nextLine().trim();
+            int newM1 = m1Raw.isEmpty() ? loaded.m1 : Integer.parseInt(m1Raw);
+
+            System.out.print("Enter New Mark2 (leave empty to keep same): ");
+            String m2Raw = sc.nextLine().trim();
+            int newM2 = m2Raw.isEmpty() ? loaded.m2 : Integer.parseInt(m2Raw);
+
+            System.out.print("Enter New Mark3 (leave empty to keep same): ");
+            String m3Raw = sc.nextLine().trim();
+            int newM3 = m3Raw.isEmpty() ? loaded.m3 : Integer.parseInt(m3Raw);
+
+            PreparedStatement pst = con.prepareStatement(
+                    "UPDATE student SET name=?, mark1=?, mark2=?, mark3=? WHERE stdid=?");
+            pst.setString(1, newName);
+            pst.setInt(2, newM1);
+            pst.setInt(3, newM2);
+            pst.setInt(4, newM3);
+            pst.setInt(5, studentId);
+
+            int rows = pst.executeUpdate();
+            if (rows > 0) {
+                printStudentById(studentId, "updated in DB.");
                 printAllStudents();
                 SwingUtilities.invokeLater(this::loadTable);
-                break;
-            } catch (NumberFormatException ex) {
-                System.out.println("Invalid input. ID and marks must be integers.");
-            } catch (SQLException ex) {
-                if (ex.getErrorCode() == 1) {
-                    System.out.println("Insert failed: Student ID already exists.");
-                } else {
-                    System.out.println("Insert failed: " + ex.getMessage());
-                }
+            } else {
+                System.out.println("Update failed: Student not found.");
             }
+        } catch (NumberFormatException ex) {
+            System.out.println("Invalid input. ID and marks must be integers.");
+        } catch (SQLException ex) {
+            System.out.println("Update failed: " + ex.getMessage());
+        }
+    }
+
+    void terminalDelete(Scanner sc) {
+        try {
+            System.out.print("Enter ID to delete: ");
+            int studentId = Integer.parseInt(sc.nextLine().trim());
+
+            StudentRecord loaded = fetchStudentById(studentId);
+            if (loaded == null) {
+                System.out.println("Student not found.");
+                return;
+            }
+
+            printStudentDetails(loaded.id, loaded.name, loaded.m1, loaded.m2, loaded.m3, "will be deleted.");
+            System.out.print("Confirm delete? (y/n): ");
+            String confirm = sc.nextLine().trim();
+            if (!"y".equalsIgnoreCase(confirm) && !"yes".equalsIgnoreCase(confirm)) {
+                System.out.println("Delete cancelled.");
+                return;
+            }
+
+            PreparedStatement pst = con.prepareStatement("DELETE FROM student WHERE stdid=?");
+            pst.setInt(1, studentId);
+            int rows = pst.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("deleted from DB.");
+                printAllStudents();
+                SwingUtilities.invokeLater(this::loadTable);
+            } else {
+                System.out.println("Delete failed: Student not found.");
+            }
+        } catch (NumberFormatException ex) {
+            System.out.println("Invalid input. ID must be an integer.");
+        } catch (SQLException ex) {
+            System.out.println("Delete failed: " + ex.getMessage());
         }
     }
 

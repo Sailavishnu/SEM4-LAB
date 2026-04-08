@@ -258,17 +258,37 @@ class RegistrationForm extends JPanel {
 
 class CustomerDashboard extends JPanel {
     CustomerDashboard(OnlineShoppingApp2 app) {
-        setLayout(new GridLayout(2, 1, 10, 10));
+        setLayout(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JButton orderBtn = new JButton("A) Place an Order");
-        JButton cartBtn = new JButton("B) Shopping Cart");
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(8, 8, 8, 8);
 
-        add(orderBtn);
-        add(cartBtn);
+        JLabel lbl = new JLabel("Select Action:");
+        g.gridx = 0;
+        g.gridy = 0;
+        add(lbl, g);
 
-        orderBtn.addActionListener(e -> new OrderPlacementForm(app).setVisible(true));
-        cartBtn.addActionListener(e -> new ShoppingCartForm(app).setVisible(true));
+        JComboBox<String> actionMenu = new JComboBox<>(new String[] {
+                "A) Place an Order",
+                "B) Shopping Cart"
+        });
+        actionMenu.setPreferredSize(new Dimension(240, 30));
+        g.gridy = 1;
+        add(actionMenu, g);
+
+        JButton openBtn = new JButton("Open");
+        g.gridy = 2;
+        add(openBtn, g);
+
+        openBtn.addActionListener(e -> {
+            String choice = (String) actionMenu.getSelectedItem();
+            if ("B) Shopping Cart".equals(choice)) {
+                new ShoppingCartForm(app).setVisible(true);
+            } else {
+                new OrderPlacementForm(app).setVisible(true);
+            }
+        });
     }
 }
 
@@ -310,16 +330,25 @@ class OrderPlacementForm extends JFrame {
 
         JPanel bottom = new JPanel(new FlowLayout());
         quantityField = new JTextField(5);
-        JButton addToCartBtn = new JButton("Add to Cart");
-        JButton placeOrderBtn = new JButton("Place Order Now");
+        JComboBox<String> actionBox = new JComboBox<>(new String[] {
+                "Add to Cart",
+                "Place Order Now"
+        });
+        JButton goBtn = new JButton("Go");
         bottom.add(new JLabel("Quantity:"));
         bottom.add(quantityField);
-        bottom.add(addToCartBtn);
-        bottom.add(placeOrderBtn);
+        bottom.add(actionBox);
+        bottom.add(goBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        addToCartBtn.addActionListener(e -> addToCart(table));
-        placeOrderBtn.addActionListener(e -> placeOrder());
+        goBtn.addActionListener(e -> {
+            String action = (String) actionBox.getSelectedItem();
+            if ("Place Order Now".equals(action)) {
+                placeOrderNow(table);
+            } else {
+                addToCart(table);
+            }
+        });
 
         loadProducts();
     }
@@ -392,25 +421,40 @@ class OrderPlacementForm extends JFrame {
         }
     }
 
-    private void placeOrder() {
-        try {
-            PreparedStatement getCart = app.con.prepareStatement(
-                    "SELECT cart_id FROM Cartss WHERE customer_id=?");
-            getCart.setInt(1, app.getCustomerId());
-            ResultSet rs = getCart.executeQuery();
-            if (!rs.next()) {
-                JOptionPane.showMessageDialog(this, "Cart is empty");
-                return;
-            }
-            int cartId = rs.getInt("cart_id");
+    private void placeOrderNow(JTable table) {
+        int row = table.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Select a product");
+            return;
+        }
 
-            PreparedStatement totalSt = app.con.prepareStatement(
-                    "SELECT SUM(ci.quantity*p.price) AS total FROM CartItemss ci " +
-                            "JOIN Productss p ON ci.product_id=p.product_id WHERE ci.cart_id=?");
-            totalSt.setInt(1, cartId);
-            ResultSet totalRs = totalSt.executeQuery();
-            totalRs.next();
-            double total = totalRs.getDouble("total");
+        int qty;
+        try {
+            qty = Integer.parseInt(quantityField.getText());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Enter a valid quantity");
+            return;
+        }
+
+        if (qty <= 0) {
+            JOptionPane.showMessageDialog(this, "Quantity must be > 0");
+            return;
+        }
+
+        int productId = (int) productModel.getValueAt(row, 0);
+        double price = (double) productModel.getValueAt(row, 3);
+        int stock = (int) productModel.getValueAt(row, 4);
+
+        if (qty > stock) {
+            JOptionPane.showMessageDialog(this, "Not enough stock");
+            return;
+        }
+
+        boolean oldAutoCommit = true;
+        try {
+            oldAutoCommit = app.con.getAutoCommit();
+            app.con.setAutoCommit(false);
+            double total = qty * price;
 
             PreparedStatement orderSt = app.con.prepareStatement(
                     "INSERT INTO Orderss (order_id,customer_id,order_date,total_amount,order_status) " +
@@ -420,45 +464,48 @@ class OrderPlacementForm extends JFrame {
             orderSt.executeUpdate();
 
             PreparedStatement getOrder = app.con.prepareStatement(
-                    "SELECT order_id FROM Orderss WHERE customer_id=? AND order_date=(SELECT MAX(order_date) FROM Orderss WHERE customer_id=?)");
-            getOrder.setInt(1, app.getCustomerId());
-            getOrder.setInt(2, app.getCustomerId());
+                    "SELECT orderss_seq.CURRVAL AS order_id FROM dual");
             ResultSet ors = getOrder.executeQuery();
             ors.next();
             int orderId = ors.getInt("order_id");
 
-            PreparedStatement items = app.con.prepareStatement(
-                    "SELECT product_id,quantity FROM CartItemss WHERE cart_id=?");
-            items.setInt(1, cartId);
-            ResultSet ir = items.executeQuery();
-            while (ir.next()) {
-                int pid = ir.getInt("product_id");
-                int qty = ir.getInt("quantity");
-                PreparedStatement priceSt = app.con.prepareStatement(
-                        "SELECT price FROM Productss WHERE product_id=?");
-                priceSt.setInt(1, pid);
-                ResultSet pr = priceSt.executeQuery();
-                pr.next();
-                double price = pr.getDouble("price");
+            PreparedStatement oiSt = app.con.prepareStatement(
+                    "INSERT INTO OrderItemss (order_item_id,order_id,product_id,quantity,price) " +
+                            "VALUES (orderitemss_seq.NEXTVAL,?,?,?,?)");
+            oiSt.setInt(1, orderId);
+            oiSt.setInt(2, productId);
+            oiSt.setInt(3, qty);
+            oiSt.setDouble(4, price);
+            oiSt.executeUpdate();
 
-                PreparedStatement oiSt = app.con.prepareStatement(
-                        "INSERT INTO OrderItemss (order_item_id,order_id,product_id,quantity,price) " +
-                                "VALUES (orderitemss_seq.NEXTVAL,?,?,?,?)");
-                oiSt.setInt(1, orderId);
-                oiSt.setInt(2, pid);
-                oiSt.setInt(3, qty);
-                oiSt.setDouble(4, price);
-                oiSt.executeUpdate();
+            PreparedStatement stockSt = app.con.prepareStatement(
+                    "UPDATE Productss SET stock_quantity = stock_quantity - ? " +
+                            "WHERE product_id=? AND stock_quantity >= ?");
+            stockSt.setInt(1, qty);
+            stockSt.setInt(2, productId);
+            stockSt.setInt(3, qty);
+            int updated = stockSt.executeUpdate();
+            if (updated == 0) {
+                app.con.rollback();
+                app.con.setAutoCommit(oldAutoCommit);
+                JOptionPane.showMessageDialog(this,
+                        "Order failed: insufficient stock for product ID " + productId);
+                return;
             }
 
-            PreparedStatement clear = app.con.prepareStatement(
-                    "DELETE FROM CartItemss WHERE cart_id=?");
-            clear.setInt(1, cartId);
-            clear.executeUpdate();
+            app.con.commit();
+            app.con.setAutoCommit(oldAutoCommit);
 
             JOptionPane.showMessageDialog(this, "Order placed! Order ID: " + orderId);
+            loadProducts();
+            quantityField.setText("");
             dispose();
         } catch (SQLException ex) {
+            try {
+                app.con.rollback();
+                app.con.setAutoCommit(oldAutoCommit);
+            } catch (SQLException ignore) {
+            }
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
     }
@@ -587,13 +634,19 @@ class ShoppingCartForm extends JFrame {
     }
 
     private void placeOrderFromCart() {
+        boolean oldAutoCommit = true;
         try {
+            oldAutoCommit = app.con.getAutoCommit();
+            app.con.setAutoCommit(false);
+
             PreparedStatement getCart = app.con.prepareStatement(
                     "SELECT cart_id FROM Cartss WHERE customer_id=?");
             getCart.setInt(1, app.getCustomerId());
             ResultSet rs = getCart.executeQuery();
             if (!rs.next()) {
                 JOptionPane.showMessageDialog(this, "Cart is empty");
+                app.con.rollback();
+                app.con.setAutoCommit(oldAutoCommit);
                 return;
             }
             int cartId = rs.getInt("cart_id");
@@ -605,6 +658,12 @@ class ShoppingCartForm extends JFrame {
             ResultSet tr = totalSt.executeQuery();
             tr.next();
             double total = tr.getDouble("total");
+            if (total <= 0) {
+                JOptionPane.showMessageDialog(this, "Cart is empty");
+                app.con.rollback();
+                app.con.setAutoCommit(oldAutoCommit);
+                return;
+            }
 
             PreparedStatement orderSt = app.con.prepareStatement(
                     "INSERT INTO Orderss (order_id,customer_id,order_date,total_amount,order_status) " +
@@ -614,9 +673,7 @@ class ShoppingCartForm extends JFrame {
             orderSt.executeUpdate();
 
             PreparedStatement getOrder = app.con.prepareStatement(
-                    "SELECT order_id FROM Orderss WHERE customer_id=? AND order_date=(SELECT MAX(order_date) FROM Orderss WHERE customer_id=?)");
-            getOrder.setInt(1, app.getCustomerId());
-            getOrder.setInt(2, app.getCustomerId());
+                    "SELECT orderss_seq.CURRVAL AS order_id FROM dual");
             ResultSet or = getOrder.executeQuery();
             or.next();
             int orderId = or.getInt("order_id");
@@ -643,6 +700,21 @@ class ShoppingCartForm extends JFrame {
                 oi.setInt(3, qty);
                 oi.setDouble(4, price);
                 oi.executeUpdate();
+
+                PreparedStatement stockSt = app.con.prepareStatement(
+                        "UPDATE Productss SET stock_quantity = stock_quantity - ? " +
+                                "WHERE product_id=? AND stock_quantity >= ?");
+                stockSt.setInt(1, qty);
+                stockSt.setInt(2, pid);
+                stockSt.setInt(3, qty);
+                int updated = stockSt.executeUpdate();
+                if (updated == 0) {
+                    app.con.rollback();
+                    app.con.setAutoCommit(oldAutoCommit);
+                    JOptionPane.showMessageDialog(this,
+                            "Order failed: insufficient stock for product ID " + pid);
+                    return;
+                }
             }
 
             PreparedStatement clear = app.con.prepareStatement(
@@ -650,9 +722,17 @@ class ShoppingCartForm extends JFrame {
             clear.setInt(1, cartId);
             clear.executeUpdate();
 
+            app.con.commit();
+            app.con.setAutoCommit(oldAutoCommit);
+
             JOptionPane.showMessageDialog(this, "Order placed! Order ID: " + orderId);
             dispose();
         } catch (SQLException ex) {
+            try {
+                app.con.rollback();
+                app.con.setAutoCommit(oldAutoCommit);
+            } catch (SQLException ignore) {
+            }
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
     }
