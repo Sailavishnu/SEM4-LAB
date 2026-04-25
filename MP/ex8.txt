@@ -1,0 +1,167 @@
+MOV   DPTR, #9000H
+        MOVX  A, @DPTR
+        MOV   R0, A
+        ANL   A, #0F0H
+        SWAP  A
+        CJNE  A, #0AH, L1
+L1:     JC    L2
+        ADD   A, #07H
+L2:     ADD   A, #30H
+        INC   DPTR
+        MOVX  @DPTR, A
+
+        MOV   A, R0
+        ANL   A, #0FH
+        CJNE  A, #0AH, L3
+L3:     JC    L4
+        ADD   A, #07H
+L4:     ADD   A, #30H
+        INC   DPTR
+        MOVX  @DPTR, A
+        END
+
+
+
+
+
+
+
+
+
+
+
+
+
+        MOV   DPTR, #9000H
+        MOVX  A, @DPTR
+        CLR   C
+        SUBB  A, #30H
+        CJNE  A, #0AH, L1
+L1:     JC    L2
+        CLR   C
+        SUBB  A, #07H
+L2:     SWAP  A
+        MOV   R0, A
+
+        INC   DPTR
+        MOVX  A, @DPTR
+        CLR   C
+        SUBB  A, #30H
+        CJNE  A, #0AH, L3
+L3:     JC    L4
+        CLR   C
+        SUBB  A, #07H
+L4:     ADD   A, R0
+        INC   DPTR
+        MOVX  @DPTR, A
+        END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        MOV   DPTR, #9000H
+        MOVX  A, @DPTR
+        MOV   R0, A
+        ANL   A, #0FH
+        MOV   R1, A
+        MOV   A, R0
+        ANL   A, #0F0H
+        SWAP  A
+        MOV   B, #08H
+        MUL   AB
+        ADD   A, R1
+        INC   DPTR
+        MOVX  @DPTR, A
+        END
+
+
+
+
+
+
+
+
+
+
+
+        MOV   DPTR, #9000H
+        MOVX  A, @DPTR
+        MOV   B, #08H
+        DIV   AB
+        MOV   R0, B
+        MOV   B, #08H
+        DIV   AB
+        SWAP  A
+        ADD   A, R0
+        INC   DPTR
+        MOVX  @DPTR, A
+        END
+
+
+
+
+
+1) HEX to ASCII
+Test Case 1:
+
+Input: 9000H → 45H
+Output: 9001H → 34H ('4'), 9002H → 35H ('5')
+
+Test Case 2:
+
+Input: 9000H → 9BH
+Output: 9001H → 39H ('9'), 9002H → 42H ('B')
+
+
+
+
+
+) ASCII to HEX
+Test Case 1:
+
+Input: 9000H → 34H ('4'), 9001H → 35H ('5')
+Output: 9002H → 45H
+
+Test Case 2:
+
+Input: 9000H → 41H ('A'), 9001H → 37H ('7')
+Output: 9002H → A7H
+
+
+
+
+
+) OCTAL to DECIMAL (HEX)
+Test Case 1:
+
+Input: 9000H → 35H (octal 35 = decimal 29)
+Output: 9001H → 1DH
+
+Test Case 2:
+
+Input: 9000H → 27H (octal 27 = decimal 23)
+Output: 9001H → 17H
+
+
+
+
+4) DECIMAL to OCTAL
+Test Case 1:
+
+Input: 9000H → 1DH (decimal 29)
+Output: 9001H → 35H (octal 35)
+
+Test Case 2:
+
+Input: 9000H → 17H (decimal 23)
+Output: 9001H → 27H (octal 27
