@@ -1,0 +1,14 @@
+                OUTPUT 2500AD
+.ORG 2000H
+CODE SEGMENT
+        ASSUME CS:CODE
+START:
+        MOV AL,90H
+        MOV DX,FFFFH
+        OUT DX,AL
+REP:    MOV DX,FFFDH
+        MOV AL,05H
+        OUT DX,AL
+        JMP REP
+CODE ENDS
+END

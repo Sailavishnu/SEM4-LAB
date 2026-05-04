@@ -1,0 +1,60 @@
+.ORG 9000H
+VALUES
+        DB 80H,80H,5AH
+        DB 44H,44H,F0H
+        DB 81H,81H,FAH
+        DB 44H,44H,F0H
+        DB 08H,08H,A5H
+        DB 44H,44H,F0H
+        DB 18H,18H,F5H
+        DB 44H,44H,F0H
+        DB 81H,30H,D0H
+        DB 44H,44H,F0H
+        DB 30H,81H,70H
+        DB 44H,44H,F0H
+        DB 13H,08H,B0H
+        DB 44H,44H,F0H
+        DB 08H,13H,E0H
+        DB 44H,44H,F0H
+.ORG 8000H
+START:
+        MOV DPTR,#E803H
+        MOV A,#80H
+        MOVX @DPTR,A
+AGAIN:  MOV R0,#10H
+        MOV DPTR,#VALUES
+L:      MOVX A,@DPTR
+        PUSH DPL
+        PUSH DPH
+        MOV DPTR,#E800H
+        MOVX @DPTR,A
+        POP DPH
+        POP DPL
+        INC DPTR
+        MOVX A,@DPTR
+        PUSH DPL
+        PUSH DPH
+        MOV DPTR,#E801H
+        MOVX @DPTR,A
+        POP DPH
+        POP DPL
+        INC DPTR
+        MOVX A,@DPTR
+        PUSH DPL
+        PUSH DPH
+        MOV DPTR,#E802H
+        MOVX @DPTR,A
+        POP DPH
+        POP DPL
+        INC DPTR
+        LCALL DELAY
+        DJNZ R0,L
+        SJMP AGAIN
+DELAY:  MOV R1,#05H
+L1:     MOV R2,#FFH
+L2:     MOV R3,#FFH
+L3:     DJNZ R3,L3
+        DJNZ R2,L2
+        DJNZ R1,L1
+RET
+END

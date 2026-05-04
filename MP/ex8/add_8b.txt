@@ -1,0 +1,16 @@
+.ORG 8000H
+START:  MOV R1,#00H
+        MOV DPTR ,#9000H
+        MOVX A,@DPTR
+        MOV R0,A
+        INC DPTR
+        MOVX A,@DPTR
+        ADD A,R0
+        JNC L1
+        INC R1
+L1:     INC DPTR
+        MOVX @DPTR,A
+        MOV A,R1
+        INC DPTR
+        MOVX @DPTR,A
+END

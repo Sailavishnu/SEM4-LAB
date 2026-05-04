@@ -1,0 +1,21 @@
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+NO1 DW BBBBH
+NO2 DW AAAAH
+QUO DW 0000H
+REM DW 0000H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE ,DS:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV DX,0000H
+                MOV AX,NO1
+                MOV BX,NO2
+                DIV BX
+                MOV QUO,AX
+                MOV REM,DX
+
+CODE ENDS
+END

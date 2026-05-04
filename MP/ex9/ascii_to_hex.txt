@@ -1,0 +1,24 @@
+.ORG 8000H
+        MOV   DPTR, #9000H
+        MOVX  A, @DPTR
+        CLR   C
+        SUBB  A, #30H
+        CJNE  A, #0AH, L1
+L1:     JC    L2
+        CLR   C
+        SUBB  A, #07H
+L2:     SWAP  A
+        MOV   R0, A
+
+        INC   DPTR
+        MOVX  A, @DPTR
+        CLR   C
+        SUBB  A, #30H
+        CJNE  A, #0AH, L3
+L3:     JC    L4
+        CLR   C
+        SUBB  A, #07H
+L4:     ADD   A, R0
+        INC   DPTR
+        MOVX  @DPTR, A
+        END

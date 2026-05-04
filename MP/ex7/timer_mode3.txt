@@ -1,0 +1,13 @@
+                OUTPUT 2500AD
+  .ORG 2000H
+CODE SEGMENT
+        ASSUME CS:CODE
+START:
+        MOV AL,96H
+        MOV DX,FFFFH
+        OUT DX,AL
+        MOV DX,FFFDH
+        MOV AL,05H
+        OUT DX,AL
+CODE ENDS
+END

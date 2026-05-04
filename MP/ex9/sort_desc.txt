@@ -1,0 +1,18 @@
+.ORG 8000H
+        MOV R0,#05H
+L1:     MOV DPTR,#9000H
+        MOV R1,#05H
+L2:     MOV R2,DPL
+        MOVX A,@DPTR
+        MOV B,A
+        INC DPTR
+        MOVX A,@DPTR
+        CJNE A,B,L3
+L3:     JC SKIP
+        MOV DPL,R2
+        MOVX @DPTR,A
+        INC DPTR
+        MOV A,B
+        MOVX @DPTR,A
+SKIP:   DJNZ R1,L2
+        DJNZ R0,L1

@@ -1,42 +1,4 @@
-
-                OUTPUT 2500AD
-.ORG 2000H
-DATA SEGMENT
-LIST DB 3FH, 06H, 5BH, 4FH, 66H, 6DH, 7DH, 07H, 7FH, 67H, 77H, 7CH, 39H, 5EH, 79H, 71H
-COUNT DB 10H
-DATA ENDS
-CODE SEGMENT
-        ASSUME CS:CODE,DS:DATA
-        MOV AX,DATA
-        MOV DS,AX
-        MOV AL,80H
-        MOV DX,FFE6H
-        OUT DX,AL
-REPEAT: LEA SI,LIST
-        MOV CL,COUNT
-L1:     MOV AL,[SI]
-        MOV DX,FFE0H
-        OUT DX,AL
-        CALL DELAY
-        INC SI
-        DEC CL
-        JNZ L1
-        JMP REPEAT
-DELAY:  MOV AH,15H
-L3:     MOV BX,AAAAH
-L2:     DEC BX
-        JNZ L2
-        DEC AH
-        JNZ L3
-        RET
-CODE ENDS
-END
-
-
-
-
-
-                OUTPUT 2500AD
+              OUTPUT 2500AD
 .ORG 2000H
 DATA SEGMENT
 LIST DB 71H,79H,5EH,39H,7CH,77H,6FH,7FH,07H,7DH,6DH,66H,4FH,5BH,06H,03H
@@ -74,6 +36,4 @@ L2:     DEC BX
         RET
 CODE ENDS
 END
-
-
 

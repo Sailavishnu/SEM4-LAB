@@ -1,0 +1,32 @@
+DATA SEGMENT
+STR1 DB "AAAA"
+STR2 DB "AAAA"
+COUNT DB 04H
+OUT1 DB "EQU","$"
+OUT2 DB "NOT","$"
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA,ES:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV ES,AX
+        LEA SI,STR1
+        LEA DI,STR2
+        MOV BL,COUNT
+        CLD
+L2:     CMPSB
+        JZ L1
+        JMP L3
+L1:     DEC BL
+        JNZ L2
+        MOV AH,09H
+        LEA DX,OUT1
+        INT 21H
+        JMP L4
+L3:     MOV AH,09H
+        LEA DX,OUT2
+        INT 21H
+L4:     MOV AH,4CH
+        INT 21H
+CODE ENDS
+END

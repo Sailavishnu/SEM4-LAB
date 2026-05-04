@@ -1,0 +1,28 @@
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+ARRAY DW 0050H,0075H,0074H,0055H
+SEARCH DW 0075H
+COUNT EQU 04H
+RESULT DB 00H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV SI,OFFSET ARRAY
+                MOV AX,SEARCH
+                MOV CL,COUNT
+L2:             CMP AX,[SI]
+                JZ L1
+                INC SI
+                DEC CL
+                JNZ L2
+                JMP L3
+L1:             INC RESULT
+                INC SI
+                DEC CL
+                JNZ L2
+L3:             HLT
+CODE ENDS
+END

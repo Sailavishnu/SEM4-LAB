@@ -1,0 +1,32 @@
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+A DB 03H
+B DB 04H
+ANS1 DB 00H
+ANS2 DB 00H
+ANS3 DB 00H
+RES DB 00H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE , DS:DATA
+                MOV AX,DATA
+                MOV DS,AX
+                MOV AL,A
+                MUL AL
+                MOV ANS1,AX
+                MOV AL,B
+                MUL AL
+                MOV ANS2,AX
+                MOV AL,A
+                MOV BL,B
+                MUL BL
+                MOV CX,02H
+                MUL CX
+                MOV ANS3,AX
+                MOV AX ,ANS1
+                ADD AX ,ANS2
+                SUB AX ,ANS3
+                MOV RES,AX
+CODE ENDS
+END

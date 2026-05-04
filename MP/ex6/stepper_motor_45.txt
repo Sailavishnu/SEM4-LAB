@@ -1,0 +1,44 @@
+               OUTPUT 2500AD
+.ORG 3000H
+DATA SEGMENT
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE,DS:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV AL,98H
+        MOV DX,FFE6H
+        OUT DX,AL
+L2:     MOV AL,00H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,00H
+        MOV DX,FFE2H
+        OUT DX,AL
+        MOV AL,02H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,03H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,01H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV AL,00H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV DX,FFE4H
+L1:     IN AL,DX
+        RCL AL,01H
+        JNC L1
+        MOV AL,04H
+        MOV DX,FFE4H
+        OUT DX,AL
+        MOV DX,FFE0H
+        IN AL,DX
+        MOV BL,00H
+        MOV BH,00H
+        DB 9AH,12H,0BH,00H,FFH
+        JMP L2
+CODE ENDS
+END

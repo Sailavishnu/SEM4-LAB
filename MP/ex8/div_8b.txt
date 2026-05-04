@@ -1,0 +1,13 @@
+.ORG 8000H
+        MOV DPTR,#9000H
+        MOVX A,@DPTR
+        MOV B,A
+        INC DPTR
+        MOVX A,@DPTR
+        DIV AB
+        INC DPTR
+        MOVX @DPTR,A
+        MOV A,B
+        INC DPTR
+        MOVX @DPTR,A
+END

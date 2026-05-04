@@ -1,0 +1,32 @@
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+LIST DB 08H,04H,02H,01H
+LIST1 DB 01H,02H,04H,08H
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS:CODE ,DS:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV AL,80H
+        MOV DX,FFE6H
+        OUT DX,AL
+L6:     MOV CH,06H
+L2:     LEA SI,LIST
+        MOV CL,04H
+L1:     MOV AL,[SI]
+        MOV DX,FFE0H
+        OUT DX,AL
+        CALL DELAY
+        INC SI
+        DEC CL
+        JNZ L1
+        DEC CH
+        JNZ L2
+        JMP L6
+DELAY:  MOV BX,5555H
+L5:     DEC BX
+        JNZCD L5
+        RET
+CODE ENDS
+END

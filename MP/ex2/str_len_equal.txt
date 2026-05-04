@@ -1,0 +1,40 @@
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+STR     DB '$'
+STR1    DB 'HELLL$'
+STR2    DB 'HELLLO$'
+LEN1    DB 00H
+LEN2    DB 00H
+RES     DB 00H
+DATA ENDS
+
+CODE SEGMENT
+        ASSUME CS:CODE, DS:DATA, ES:DATA
+                MOV AX, DATA
+                MOV DS, AX
+                MOV ES, AX
+                MOV AL, STR
+                LEA SI, STR1
+
+L2:             CMP AL, [SI]
+                JZ L1
+                INC LEN1
+                INC SI
+                JMP L2
+L1:             LEA SI, STR2
+L3:             CMP AL, [SI]
+                JZ L4
+                INC LEN2
+                INC SI
+                JMP L3
+L4:             MOV AL, LEN1
+                CMP AL, LEN2
+                JZ L5
+                JMP L6
+L5:             MOV RES, 01H
+                HLT
+L6:             MOV RES ,00H
+                HLT
+CODE ENDS
+END

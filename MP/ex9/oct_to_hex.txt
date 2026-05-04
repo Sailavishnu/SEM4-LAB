@@ -1,0 +1,15 @@
+.ORG 8000H
+        MOV   DPTR, #9000H
+        MOVX  A, @DPTR
+        MOV   R0, A
+        ANL   A, #0FH
+        MOV   R1, A
+        MOV   A, R0
+        ANL   A, #0F0H
+        SWAP  A
+        MOV   B, #08H
+        MUL   AB
+        ADD   A, R1
+        INC   DPTR
+        MOVX  @DPTR, A
+END

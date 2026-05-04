@@ -1,0 +1,25 @@
+                OUTPUT 2500AD
+.ORG 2000H
+DATA SEGMENT
+DATA ENDS
+CODE SEGMENT
+        ASSUME CS: CODE, DS:DATA
+        MOV AX,DATA
+        MOV DS,AX
+        MOV AL,80H
+        MOV DX,FFE6H
+        OUT DX,AL
+L1:     MOV AL,00H
+L2:     MOV DX,FFE0H
+        OUT DX,AL
+        INC AL
+        CMP AL,FFH
+        JNZ L2
+L3:     MOV DX,FFE0H
+        OUT DX,AL
+        DEC AL
+        CMP AL,00H
+        JNZ L3
+        JMP L1
+CODE ENDS
+END
