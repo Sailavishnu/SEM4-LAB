@@ -1,0 +1,42 @@
+.ORG 8000H
+; Initialize 24-bit result at 60H (low), 61H (mid), 62H (high) to 00.
+START:  MOV 60H,#00H
+        MOV 61H,#00H
+        MOV 62H,#00H
+
+; Add first number from 40H into result and propagate carry.
+        MOV A,60H
+        ADD A,40H
+        MOV 60H,A
+        MOV A,61H
+        ADDC A,#00H
+        MOV 61H,A
+        MOV A,62H
+        ADDC A,#00H
+        MOV 62H,A
+
+; Add second number from 41H into result and propagate carry.
+        MOV A,60H
+        ADD A,41H
+        MOV 60H,A
+        MOV A,61H
+        ADDC A,#00H
+        MOV 61H,A
+        MOV A,62H
+        ADDC A,#00H
+        MOV 62H,A
+
+; Add third number from 42H into result and propagate carry.
+        MOV A,60H
+        ADD A,42H
+        MOV 60H,A
+        MOV A,61H
+        ADDC A,#00H
+        MOV 61H,A
+        MOV A,62H
+        ADDC A,#00H
+        MOV 62H,A
+
+; Stop here.
+L1:     SJMP L1
+END

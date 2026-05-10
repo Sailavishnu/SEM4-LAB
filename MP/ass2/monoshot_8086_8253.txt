@@ -1,0 +1,12 @@
+; 8086 program for 8253 counter 1 monoshot, 100 ms at 1 MHz
+; Counter 1 port: 40H, Control port: 44H
+
+        MOV AL,72H        ; C1, LSB/MSB, mode 1, binary
+        OUT 44H,AL
+
+        MOV AX,86A0H      ; Count = 100000d (0x186A0) -> LSB/MSB = A0h,86h
+        OUT 40H,AL        ; LSB
+        MOV AL,AH
+        OUT 40H,AL        ; MSB
+
+L1:     JMP L1
