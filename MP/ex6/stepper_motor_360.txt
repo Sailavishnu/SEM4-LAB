@@ -26,7 +26,7 @@ L1:     MOV AL,[SI]
         JMP L6
 DELAY:  MOV BX,5555H
 L5:     DEC BX
-        JNZCD L5
+        JNZ L5
         RET
 CODE ENDS
 END

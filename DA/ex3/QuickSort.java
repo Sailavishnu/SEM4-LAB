@@ -26,21 +26,21 @@ public class QuickSort {
 
     }
 
-    private static void QuickSort(int[] array, int low, int high) {
-        if (low < high) {
-            int s = partition(array, low, high);
-            QuickSort(array, low, s - 1);
-            QuickSort(array, s + 1, high);
+    private static void QuickSort(int[] array, int left, int right) {
+        if (left < right) {
+            int s = partition(array, left, right);
+            QuickSort(array, left, s - 1);
+            QuickSort(array, s + 1, right);
         }
     }
 
-    private static int partition(int[] A, int low, int high) {
-        int pivot = A[low];
-        int i = low + 1;
-        int j = high;
+    private static int partition(int[] A, int left, int right) {
+        int pivot = A[left];
+        int i = left + 1;
+        int j = right;
 
         while (true) {
-            while (i <= high && pivot >= A[i]) {
+            while (i <= right && pivot >= A[i]) {
                 i++;
             }
             while (pivot < A[j]) {
@@ -51,8 +51,8 @@ public class QuickSort {
                 A[i] = A[j];
                 A[j] = t;
             } else {
-                int t = A[low];
-                A[low] = A[j];
+                int t = A[left];
+                A[left] = A[j];
                 A[j] = t;
                 return j;
             }

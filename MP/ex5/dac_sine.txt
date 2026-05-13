@@ -10,7 +10,7 @@ CODE SEGMENT
         MOV AL,80H
         MOV DX,FFE6H
         OUT DX,AL
-L5:     MOV SI,OFFSET LIST
+L5:     MOV SI,OFFSET LIST //LEA SI,LIST
         MOV CL,13H
 L1:     MOV AL,[SI]
         MOV DX,FFE0H
@@ -25,7 +25,7 @@ L2:     DEC SI
         OUT DX,AL
         DEC CL
         JNZ L2
-        MOV SI,OFFSET LIST
+        //MOV SI,OFFSET LIST
         MOV CL,13H
 L3:     MOV AL,[SI]
         NEG AL

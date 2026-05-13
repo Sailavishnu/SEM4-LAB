@@ -14,6 +14,8 @@ public class HorsPool {
             shiftTable[pattern.charAt(i)] = m - 1 - i;
     }
 
+    //(float)pattern.charAt(i);
+
     static int horspoolSearch(String text, String pattern) {
         int n = text.length();
         int m = pattern.length();

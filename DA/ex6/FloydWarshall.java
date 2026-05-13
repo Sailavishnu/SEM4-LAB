@@ -42,6 +42,7 @@ public class FloydWarshall {
 
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
+                    //D[i][j]= Math.-min(D[i][j], D[i][k]+ D[k][j])
                     if (D[i][k] + D[k][j] < D[i][j]) {
                         D[i][j] = D[i][k] + D[k][j];
                     }

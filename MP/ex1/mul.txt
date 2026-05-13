@@ -15,6 +15,5 @@ CODE SEGMENT
                 MUL BX
                 MOV LSB,AX
                 MOV MSB,DX
-
 CODE ENDS
 END
